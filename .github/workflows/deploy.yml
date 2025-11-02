@@ -28,54 +28,73 @@ jobs:
       with:
         ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
         
-    - name: Deploy to VM
+    - name: Deploy using webhook logic
       uses: appleboy/ssh-action@v1
       with:
-        host: ${{ secrets.SSH_HOST }}
-        username: ${{ secrets.SSH_USER }}
+        host: course.prafdin.ru
+        port: 2462
+        username: ubuntu
         key: ${{ secrets.SSH_PRIVATE_KEY }}
         script: |
           set -e
           
-          APP_DIR="/opt/CattyForDevOps"
-          SERVICE_NAME="catty.service"
+          # Конфиг как в webhook
+          DEPLOY_DIR="/opt/CattyForDevOps"
+          MAIN_DIR="/home/ubuntu/DevOps1/devops-demo-website"
           
-          echo "🚀 Starting deployment..."
+          echo "🚀 Starting deployment using webhook logic..."
           
           # Создаём директорию для приложения
-          sudo mkdir -p $APP_DIR
-          sudo rm -rf $APP_DIR/*
-          sudo cp -r "/home/ubuntu/DevOPs/DevOps1/CattyForDevOps" "/opt"
-          sudo chown -R ubuntu:ubuntu $APP_DIR
-          cd $APP_DIR
+          sudo mkdir -p $DEPLOY_DIR
+          sudo chown -R ubuntu:ubuntu $DEPLOY_DIR
           
-          # Активируем venv и устанавливаем зависимости
-          if [ ! -d "/home/ubuntu/DevOPs/DevOps1/venv" ]; then	
-             python3 -m venv /home/ubuntu/DevOPs/DevOps1/venv
+          # Копируем код в DEPLOY_DIR (аналог git pull в webhook)
+          echo "📦 Updating application code..."
+          sudo rm -rf $DEPLOY_DIR/*
+          sudo cp -r "/home/ubuntu/DevOPs/DevOps1/CattyForDevOps"/* $DEPLOY_DIR/
+          sudo chown -R ubuntu:ubuntu $DEPLOY_DIR
+          cd $DEPLOY_DIR
+          
+          # build.sh (если есть)
+          build_script="$MAIN_DIR/build.sh"
+          if [ -f "$build_script" ]; then
+            echo "🔧 Running build.sh..."
+            bash "$build_script"
           fi
-          source /home/ubuntu/DevOPs/DevOps1/venv/bin/activate
-          pip install --upgrade pip
-          pip install -r requirements.txt
           
-          # Создаём/обновляем systemd service
-          sudo tee /etc/systemd/system/$SERVICE_NAME > /dev/null <<EOF
-          [Unit]
-          Description=Catty Reminders App
-          After=network.target
+          # test.sh (если есть)
+          test_script="$MAIN_DIR/test.sh"
+          if [ -f "$test_script" ]; then
+            echo "🧪 Running tests..."
+            if bash "$test_script"; then
+              echo "✅ Tests passed"
+            else
+              echo "❌ Tests failed - deployment cancelled"
+              exit 1
+            fi
+          fi
           
-          [Service]
-          User=ubuntu
-          WorkingDirectory=$APP_DIR
-          ExecStart=/home/ubuntu/DevOPs/DevOps1/venv/bin/uvicorn app.main:app --host 0.0.0.0 --port 8181
-          Restart=always
+          # deploy.sh (если есть)
+          deploy_script="$MAIN_DIR/deploy.sh"
+          if [ -f "$deploy_script" ]; then
+            echo "🚀 Running deploy.sh..."
+            bash "$deploy_script"
+            echo "✅ Deployment completed"
+          else
+            echo "⚠️ No deploy.sh, only code updated"
+            
+            # Минимальный деплой если нет deploy.sh
+            VENV_PATH="/home/ubuntu/venv"
+            if [ ! -d "$VENV_PATH" ]; then	
+              python3 -m venv $VENV_PATH
+            fi
+            source $VENV_PATH/bin/activate
+            pip install --upgrade pip
+            pip install -r requirements.txt
+            
+            # Перезапускаем сервис
+            sudo systemctl restart catty.service
+          fi
           
-          [Install]
-          WantedBy=multi-user.target
-          EOF
-          
-          sudo systemctl daemon-reload
-          sudo systemctl enable $SERVICE_NAME
-          sudo systemctl restart $SERVICE_NAME
-          
-          echo "✅ Deployment completed!"
-          echo "📱 Application available at: http://app.zabirov.course.prafdin.ru"
+          echo "🎉 Application deployed successfully!"
+          echo "📱 Available at: http://app.zabirov.course.prafdin.ru"
