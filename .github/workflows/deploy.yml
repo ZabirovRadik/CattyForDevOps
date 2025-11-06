@@ -38,7 +38,8 @@ jobs:
 
           echo "📥 Pulling latest code from repository..."
           cd "$MAIN_DIR"
-          git pull origin github-actions
+          git fetch origin
+          git reset --hard origin/github-actions
           
           echo "🚀 Starting deployment using webhook logic..."
           
