@@ -23,6 +23,7 @@ if ! ps -p $APP_PID > /dev/null; then
     exit 1
 fi
 
+
 if ! curl -s http://localhost:8282 > /dev/null; then
     echo "❌ Application not responding on port 8282"
     kill $APP_PID
@@ -30,6 +31,7 @@ if ! curl -s http://localhost:8282 > /dev/null; then
 fi
 
 # Запускаем тесты
+export TEST_BASE_URL="http://localhost:8282"
 pytest -v tests/test_unit.py
 pytest -v tests/test_api.py
 pytest -s -v --browser chromium tests/test_ui.py
