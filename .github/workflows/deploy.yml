@@ -40,6 +40,10 @@ jobs:
           
           DEPLOY_DIR="/opt/CattyForDevOps"
           MAIN_DIR="/home/ubuntu/DevOPs/DevOps1/CattyForDevOps"
+
+          echo "📥 Pulling latest code from repository..."
+          cd "$MAIN_DIR"
+          git pull origin github-actions
           
           echo "🚀 Starting deployment using webhook logic..."
           
@@ -83,7 +87,7 @@ jobs:
             echo "⚠️ No deploy.sh, only code updated"
             
             # Минимальный деплой если нет deploy.sh
-            VENV_PATH="/home/ubuntu/venv"
+            VENV_PATH="/home/ubuntu/DevOPs/DevOps1/venv"
             if [ ! -d "$VENV_PATH" ]; then	
               python3 -m venv $VENV_PATH
             fi

@@ -4,11 +4,11 @@ cd /opt/CattyForDevOps
 echo "🧪 Running Catty tests..."
 
 # Создаём и активируем виртуальное окружение
-if [ ! -d "/home/ubuntu/DevOps1/venv" ]; then	
-   python3 -m venv /home/ubuntu/DevOps1/venv
+if [ ! -d "/home/ubuntu/DevOps/DevOps1/venv" ]; then	
+   python3 -m venv /home/ubuntu/DevOps/DevOps1/venv
 fi
 
-source /home/ubuntu/DevOps1/venv/bin/activate
+source /home/ubuntu/DevOps/DevOps1/venv/bin/activate
 export PYTHONPATH="/opt/CattyForDevOps:$PYTHONPATH"
 
 # Устанавливаем зависимости
