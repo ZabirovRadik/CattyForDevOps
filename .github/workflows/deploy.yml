@@ -23,11 +23,6 @@ jobs:
         pip install -r requirements.txt
         echo "✅ Build completed on GitHub Runner"
         
-    - name: Setup SSH
-      uses: webfactory/ssh-agent@v0.7.0
-      with:
-        ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
-        
     - name: Deploy using webhook logic
       uses: appleboy/ssh-action@v1
       with:
