@@ -14,7 +14,7 @@ playwright install --with-deps chromium
 
 # Запускаем приложение в фоне
 echo "🚀 Starting application..."
-python3 "$MAIN_DIR/app/app.py" --port 8282&
+$VENV_PATH/bin/uvicorn app.main:app --host 0.0.0.0 --port 8282 &
 APP_PID=$!
 sleep 5
 
