@@ -5,7 +5,7 @@ on:
     types: [published]
 
 jobs:
-  deploy:
+  build-and-test:
     runs-on: ubuntu-latest
     
     steps:
@@ -17,7 +17,31 @@ jobs:
       with:
         python-version: '3.10'
         
-    - name: Deploy using webhook logic
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        playwright install --with-deps chromium
+        
+    - name: Run tests
+      run: |
+        pytest -v tests/test_unit.py
+        # Запускаем API тесты на временном сервере
+        python -m uvicorn app.main:app --host 0.0.0.0 --port 8181 &
+        SERVER_PID=$!
+        sleep 5
+        pytest -v tests/test_api.py
+        kill $SERVER_PID
+        
+  deploy:
+    runs-on: ubuntu-latest
+    needs: build-and-test
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Deploy to server
       uses: appleboy/ssh-action@v1
       with:
         host: course.prafdin.ru
@@ -29,71 +53,24 @@ jobs:
           
           DEPLOY_DIR="/opt/CattyForDevOps"
           MAIN_DIR="/home/ubuntu/DevOPs/DevOps1/CattyForDevOps"
-          VENV_PATH="$MAIN_DIR/../venv"
-          SERVICE_NAME=catty.service
 
           echo "📥 Pulling latest code from repository..."
           cd "$MAIN_DIR"
           git fetch origin
           git reset --hard origin/github-actions
 
-          # Создаём и активируем виртуальное окружение
-          if [ ! -d "$VENV_PATH" ]; then	
-             python3 -m venv $VENV_PATH
-          fi
-
-          source "$VENV_PATH/bin/activate"
-          export PYTHONPATH="/opt/CattyForDevOps:$PYTHONPATH"
-
-          # Устанавливаем зависимости
-          pip install --upgrade pip
-          pip install -r requirements.txt
-
-          # build.sh (если есть)
-          build_script="$MAIN_DIR/build.sh"
-          if [ -f "$build_script" ]; then
-            echo "🔧 Running build.sh..."
-            bash "$build_script"
-          fi
-
-          # test.sh (если есть)
-          test_script="$MAIN_DIR/test.sh"
-          if [ -f "$test_script" ]; then
-            echo "🧪 Running tests..."
-            if bash "$test_script"; then
-              echo "✅ Tests passed"
-            else
-              echo "❌ Tests failed - deployment cancelled"
-              exit 1
-            fi
-          fi
-
-          
-          echo "🚀 Starting deployment using webhook logic..."
-          
-          # Создаём директорию для приложения
-          sudo mkdir -p $DEPLOY_DIR
-          sudo chown -R ubuntu:ubuntu $DEPLOY_DIR
+          echo "🚀 Starting deployment..."
           
           # Копируем код в DEPLOY_DIR 
           echo "📦 Updating application code..."
+          sudo mkdir -p $DEPLOY_DIR
           sudo rm -rf $DEPLOY_DIR/*
           sudo cp -r "$MAIN_DIR"/* $DEPLOY_DIR/
           sudo chown -R ubuntu:ubuntu $DEPLOY_DIR
-          cd $DEPLOY_DIR
-      
-          # deploy.sh (если есть)
-          deploy_script="$MAIN_DIR/deploy.sh"
-          if [ -f "$deploy_script" ]; then
-            echo "🚀 Running deploy.sh..."
-            bash "$deploy_script"
-            echo "✅ Deployment completed"
-          else
-            echo "⚠️ No deploy.sh, only code updated"
-            
-            # Перезапускаем сервис
-            sudo systemctl restart "$SERVICE_NAME"
-          fi
+          
+          # Запускаем deploy.sh
+          echo "🔧 Running deploy.sh..."
+          bash "$DEPLOY_DIR/deploy.sh""
           
           echo "🎉 Application deployed successfully!"
           echo "📱 Available at: http://app.zabirov.course.prafdin.ru"
