@@ -2,6 +2,13 @@
 set -e
 echo "🧪 Running Catty tests..."
 
+MAIN_DIR="/home/ubuntu/DevOPs/DevOps1/CattyForDevOps"
+VENV_PATH="$MAIN_DIR/../venv"
+
+if [ ! -d "$VENV_PATH" ]; then	
+             python3 -m venv $VENV_PATH
+fi
+
 # Устанавливаем Playwright браузеры
 playwright install --with-deps chromium
 

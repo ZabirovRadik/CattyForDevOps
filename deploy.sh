@@ -1,6 +1,10 @@
 ﻿#!/bin/bash
 set -e
 
+DEPLOY_DIR="/opt/CattyForDevOps"
+MAIN_DIR="/home/ubuntu/DevOPs/DevOps1/CattyForDevOps"
+VENV_PATH="$MAIN_DIR/../venv"
+SERVICE_NAME=catty.service
 
 # Создаём systemd unit для FastAPI (если нет)
 sudo tee /etc/systemd/system/$SERVICE_NAME > /dev/null <<EOF
@@ -11,7 +15,7 @@ After=network.target
 [Service]
 User=ubuntu
 WorkingDirectory=$DEPLOY_DIR
-ExecStart=/home/ubuntu/DevOPs/DevOps1/venv/bin/uvicorn app.main:app --host 0.0.0.0 --port 8181
+ExecStart=$VENV_PATH/bin/uvicorn app.main:app --host 0.0.0.0 --port 8181
 Restart=always
 
 [Install]
