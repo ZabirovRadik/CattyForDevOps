@@ -1,4 +1,4 @@
-FROM python:3.10
+FROM python:3.10-slim
 
 WORKDIR /opt/CattyForDevOps
 
@@ -7,7 +7,10 @@ RUN pip install --upgrade pip
 RUN pip install -r requirements.txt
 
 
-ENV PYTHONPATH="/opt/CattyForDevOps:$PYTHONPATH"
+ENV PYTHONPATH="/opt/CattyForDevOps"
+
+RUN python --version
+RUN pip list
 
 EXPOSE 8181
 
