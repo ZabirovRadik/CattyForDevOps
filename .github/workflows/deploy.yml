@@ -17,12 +17,6 @@ jobs:
       with:
         python-version: '3.10'
         
-    - name: Install dependencies and build
-      run: |
-        python -m pip install --upgrade pip
-        pip install -r requirements.txt
-        echo "✅ Build completed on GitHub Runner"
-        
     - name: Deploy using webhook logic
       uses: appleboy/ssh-action@v1
       with:
@@ -35,11 +29,25 @@ jobs:
           
           DEPLOY_DIR="/opt/CattyForDevOps"
           MAIN_DIR="/home/ubuntu/DevOPs/DevOps1/CattyForDevOps"
+          VENV_PATH="$MAIN_DIR/../venv"
 
           echo "📥 Pulling latest code from repository..."
           cd "$MAIN_DIR"
           git fetch origin
           git reset --hard origin/github-actions
+
+          # Создаём и активируем виртуальное окружение
+          if [ ! -d "$VENV_PATH" ]; then	
+             python3 -m venv $VENV_PATH
+          fi
+
+          source "$VENV_PATH/bin/activate"
+          export PYTHONPATH="/opt/CattyForDevOps:$PYTHONPATH"
+
+          # Устанавливаем зависимости
+          pip install --upgrade pip
+          pip install -r requirements.txt
+
           
           echo "🚀 Starting deployment using webhook logic..."
           
@@ -81,15 +89,6 @@ jobs:
             echo "✅ Deployment completed"
           else
             echo "⚠️ No deploy.sh, only code updated"
-            
-            # Минимальный деплой если нет deploy.sh
-            VENV_PATH="/home/ubuntu/DevOPs/DevOps1/venv"
-            if [ ! -d "$VENV_PATH" ]; then	
-              python3 -m venv $VENV_PATH
-            fi
-            source $VENV_PATH/bin/activate
-            pip install --upgrade pip
-            pip install -r requirements.txt
             
             # Перезапускаем сервис
             sudo systemctl restart catty.service

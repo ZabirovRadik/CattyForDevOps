@@ -3,17 +3,6 @@ set -e
 cd /opt/CattyForDevOps
 echo "🧪 Running Catty tests..."
 
-# Создаём и активируем виртуальное окружение
-if [ ! -d "/home/ubuntu/DevOps/DevOps1/venv" ]; then	
-   python3 -m venv /home/ubuntu/DevOps/DevOps1/venv
-fi
-
-source /home/ubuntu/DevOps/DevOps1/venv/bin/activate
-export PYTHONPATH="/opt/CattyForDevOps:$PYTHONPATH"
-
-# Устанавливаем зависимости
-pip install --upgrade pip
-pip install -r requirements.txt
 
 # Устанавливаем Playwright браузеры
 playwright install --with-deps chromium
