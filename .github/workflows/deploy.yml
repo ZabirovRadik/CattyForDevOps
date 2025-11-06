@@ -30,6 +30,7 @@ jobs:
           DEPLOY_DIR="/opt/CattyForDevOps"
           MAIN_DIR="/home/ubuntu/DevOPs/DevOps1/CattyForDevOps"
           VENV_PATH="$MAIN_DIR/../venv"
+          SERVICE_NAME=catty.service
 
           echo "📥 Pulling latest code from repository..."
           cd "$MAIN_DIR"
@@ -48,6 +49,25 @@ jobs:
           pip install --upgrade pip
           pip install -r requirements.txt
 
+          # build.sh (если есть)
+          build_script="$MAIN_DIR/build.sh"
+          if [ -f "$build_script" ]; then
+            echo "🔧 Running build.sh..."
+            bash "$build_script"
+          fi
+
+          # test.sh (если есть)
+          test_script="$MAIN_DIR/test.sh"
+          if [ -f "$test_script" ]; then
+            echo "🧪 Running tests..."
+            if bash "$test_script"; then
+              echo "✅ Tests passed"
+            else
+              echo "❌ Tests failed - deployment cancelled"
+              exit 1
+            fi
+          fi
+
           
           echo "🚀 Starting deployment using webhook logic..."
           
@@ -61,26 +81,7 @@ jobs:
           sudo cp -r "$MAIN_DIR"/* $DEPLOY_DIR/
           sudo chown -R ubuntu:ubuntu $DEPLOY_DIR
           cd $DEPLOY_DIR
-          
-          # build.sh (если есть)
-          build_script="$MAIN_DIR/build.sh"
-          if [ -f "$build_script" ]; then
-            echo "🔧 Running build.sh..."
-            bash "$build_script"
-          fi
-          
-          # test.sh (если есть)
-          test_script="$MAIN_DIR/test.sh"
-          if [ -f "$test_script" ]; then
-            echo "🧪 Running tests..."
-            if bash "$test_script"; then
-              echo "✅ Tests passed"
-            else
-              echo "❌ Tests failed - deployment cancelled"
-              exit 1
-            fi
-          fi
-          
+      
           # deploy.sh (если есть)
           deploy_script="$MAIN_DIR/deploy.sh"
           if [ -f "$deploy_script" ]; then
@@ -91,7 +92,7 @@ jobs:
             echo "⚠️ No deploy.sh, only code updated"
             
             # Перезапускаем сервис
-            sudo systemctl restart catty.service
+            sudo systemctl restart "$SERVICE_NAME"
           fi
           
           echo "🎉 Application deployed successfully!"

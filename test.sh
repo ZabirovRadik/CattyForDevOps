@@ -1,6 +1,5 @@
 ﻿#!/bin/bash
 set -e
-cd /opt/CattyForDevOps
 echo "🧪 Running Catty tests..."
 
 # Устанавливаем Playwright браузеры
@@ -8,7 +7,7 @@ playwright install --with-deps chromium
 
 # Запускаем приложение в фоне
 echo "🚀 Starting application..."
-python app.py &
+python3 "$MAIN_DIR/app/app.py" --port 8282&
 APP_PID=$!
 sleep 5
 
