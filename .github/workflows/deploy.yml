@@ -39,7 +39,7 @@ jobs:
           set -e
           
           DEPLOY_DIR="/opt/CattyForDevOps"
-          MAIN_DIR="/home/ubuntu/DevOps1/devops-demo-website"
+          MAIN_DIR="/home/ubuntu/DevOPs/DevOps1/CattyForDevOps"
           
           echo "🚀 Starting deployment using webhook logic..."
           
@@ -50,7 +50,7 @@ jobs:
           # Копируем код в DEPLOY_DIR 
           echo "📦 Updating application code..."
           sudo rm -rf $DEPLOY_DIR/*
-          sudo cp -r "/home/ubuntu/DevOPs/DevOps1/CattyForDevOps"/* $DEPLOY_DIR/
+          sudo cp -r "$MAIN_DIR"/* $DEPLOY_DIR/
           sudo chown -R ubuntu:ubuntu $DEPLOY_DIR
           cd $DEPLOY_DIR
           
