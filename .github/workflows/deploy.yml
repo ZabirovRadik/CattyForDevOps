@@ -38,7 +38,6 @@ jobs:
         script: |
           set -e
           
-          # Конфиг как в webhook
           DEPLOY_DIR="/opt/CattyForDevOps"
           MAIN_DIR="/home/ubuntu/DevOps1/devops-demo-website"
           
@@ -48,7 +47,7 @@ jobs:
           sudo mkdir -p $DEPLOY_DIR
           sudo chown -R ubuntu:ubuntu $DEPLOY_DIR
           
-          # Копируем код в DEPLOY_DIR (аналог git pull в webhook)
+          # Копируем код в DEPLOY_DIR 
           echo "📦 Updating application code..."
           sudo rm -rf $DEPLOY_DIR/*
           sudo cp -r "/home/ubuntu/DevOPs/DevOps1/CattyForDevOps"/* $DEPLOY_DIR/
