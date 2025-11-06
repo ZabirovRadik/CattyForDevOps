@@ -1,0 +1,12 @@
+__pycache__/
+*.pyc
+.venv/
+venv/
+.git/
+.gitignore
+Dockerfile
+.dockerignore
+playwright-report/
+test-results/
+*.db
+reminder_db.json
