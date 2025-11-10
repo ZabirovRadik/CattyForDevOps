@@ -1,4 +1,4 @@
-﻿name: CD - Deploy Docker Container
+﻿name: CD - Deploy with Docker Compose
 
 on:
   workflow_run:
@@ -15,13 +15,8 @@ jobs:
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
-      
-    - name: Setup SSH
-      uses: webfactory/ssh-agent@v0.7.0
-      with:
-        ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
-        
-    - name: Deploy Docker Container
+  
+    - name: Deploy with Docker Compose
       uses: appleboy/ssh-action@v1
       with:
         host: course.prafdin.ru
@@ -31,33 +26,23 @@ jobs:
         script: |
           set -e
           
-          echo "🚀 Starting Docker deployment..."
-          echo "📱 Target: http://app.zabirov.course.prafdin.ru"
+          echo "🚀 Deploying with Docker Compose..."
           
-          echo "Logging to GHCR..."
-          echo "${{ secrets.GITHUB_TOKEN }}" | sudo docker login ghcr.io -u ${{ github.actor }} --password-stdin
+          echo "${{ secrets.TOKEN }}" | sudo docker login ghcr.io -u ${{ github.actor }} --password-stdin
           
-          echo "Pulling new image..."
-          sudo docker pull ghcr.io/${{ github.repository_owner }}/catty-app:latest
+          cd /home/ubuntu/DevOPs/DevOps1/CattyForDevOps
+          sudo docker compose down
           
-          echo "🔄 Restarting container..."
-          sudo docker stop catty-app || true
-          sudo docker rm catty-app || true
+          sudo docker compose pull backend
           
-          echo "Starting new container..."
-          sudo docker run -d \
-            --name catty-app \
-            --restart unless-stopped \
-            -p 8181:8181 \
-            -e PYTHONPATH="/opt/CattyForDevOps" \
-            ghcr.io/${{ github.repository_owner }}/catty-app:latest
+          sudo docker compose up -d
           
-          echo "📊 Checking deployment..."
-          sleep 3
-          sudo docker ps
+          echo "📊 Checking services..."
+          sudo docker compose ps
           
-          echo "🔍 Testing application..."
-          curl -f http://app.zabirov.course.prafdin.ru/login && echo "✅ Application is running!" || echo "⚠️ Application might be starting..."
+          echo "🔍 Checking application health..."
+          sleep 10
+          curl -f http://app.zabirov.course.prafdin.ru/login || echo "⚠️ Application might be starting..."
           
-          echo "🎉 Docker deployment completed!"
+          echo "✅ Docker Compose deployment completed!"
           echo "🌐 Available at: http://app.zabirov.course.prafdin.ru"

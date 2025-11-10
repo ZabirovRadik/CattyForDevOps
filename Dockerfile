@@ -1,33 +1,11 @@
 FROM python:3.11
 
-RUN apt-get update && apt-get install -y \
-    libnss3 \
-    libnspr4 \
-    libdbus-1-3 \
-    libatk1.0-0 \
-    libatk-bridge2.0-0 \
-    libcups2 \
-    libdrm2 \
-    libxkbcommon0 \
-    libxcomposite1 \
-    libxdamage1 \
-    libxrandr2 \
-    libgbm1 \
-    libxss1 \
-    libasound2 \
-    libpangocairo-1.0-0 \
-    libpango-1.0-0 \
-    libcairo2 \
-    libxfixes3 \
-    && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /opt/CattyForDevOps
 
 COPY requirements.txt .
 RUN pip install --upgrade pip && \
-    pip install -r requirements.txt --no-cache-dir
-
-RUN playwright install chromium
+    pip install -r requirements.txt
 
 COPY . .
 
