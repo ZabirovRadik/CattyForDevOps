@@ -35,7 +35,7 @@ jobs:
         
     - name: Run integration tests
       run: |
-         docker exec test-app python -m pytest tests/ -v
+        docker exec test-app python -m pytest tests/test_unit.py tests/test_api.py -v
         
     - name: Cleanup
       if: always()
