@@ -17,23 +17,9 @@ jobs:
     - name: Build Docker image
       run: |
         docker build -t catty-app .
-    - name: Debug application startup
-      run: |
-        # Запускаем в интерактивном режиме чтобы увидеть ошибку
-        echo "🚨 Running app in foreground to see error:"
-        docker run --rm -p 8181:8181 catty-app
-    
-        # Или альтернативно - запускаем и сразу смотрим статус
-        echo "🔍 Alternative debug:"
-        docker run -d -p 8181:8181 --name test-app catty-app
-        sleep 2
-        docker ps -a
-        docker logs test-app || echo "Container already stopped"
     - name: Start application and run basic health check
       run: |
         docker ps -a
-        echo "📜 Container logs:"
-        docker logs test-app
         echo "🔄 Waiting for app to start..."
         sleep 10
         
