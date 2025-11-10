@@ -29,7 +29,6 @@ jobs:
         
     - name: Run integration tests
       run: |
-         docker exec test-app playwright install chromium
          docker exec test-app python -m pytest tests/ -v
         
     - name: Cleanup
