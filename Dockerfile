@@ -8,6 +8,7 @@ RUN pip install --upgrade pip && \
     pip install -r requirements.txt
 
 COPY . .
+COPY config-docker.json config.json
 
 ENV PYTHONPATH="/opt/CattyForDevOps"
 
