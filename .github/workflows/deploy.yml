@@ -1,34 +1,27 @@
-﻿name: Deploy to Production
+﻿name: CD - Deploy Docker Container
 
 on:
-  release:
-    types: [published]
+  workflow_run:
+    workflows: ["CI Pipeline with Docker"]
+    types:
+      - completed
+    branches: [Docker]
 
 jobs:
   deploy:
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
     runs-on: ubuntu-latest
     
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
       
-    - name: Set up Python
-      uses: actions/setup-python@v4
-      with:
-        python-version: '3.10'
-        
-    - name: Install dependencies and build
-      run: |
-        python -m pip install --upgrade pip
-        pip install -r requirements.txt
-        echo "✅ Build completed on GitHub Runner"
-        
     - name: Setup SSH
       uses: webfactory/ssh-agent@v0.7.0
       with:
         ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
         
-    - name: Deploy using webhook logic
+    - name: Deploy Docker Container
       uses: appleboy/ssh-action@v1
       with:
         host: course.prafdin.ru
@@ -38,62 +31,33 @@ jobs:
         script: |
           set -e
           
-          DEPLOY_DIR="/opt/CattyForDevOps"
-          MAIN_DIR="/home/ubuntu/DevOps1/devops-demo-website"
+          echo "🚀 Starting Docker deployment..."
+          echo "📱 Target: http://app.zabirov.course.prafdin.ru"
           
-          echo "🚀 Starting deployment using webhook logic..."
+          echo "Logging to GHCR..."
+          echo "${{ secrets.GITHUB_TOKEN }}" | sudo docker login ghcr.io -u ${{ github.actor }} --password-stdin
           
-          # Создаём директорию для приложения
-          sudo mkdir -p $DEPLOY_DIR
-          sudo chown -R ubuntu:ubuntu $DEPLOY_DIR
+          echo "Pulling new image..."
+          sudo docker pull ghcr.io/${{ github.repository_owner }}/catty-app:latest
           
-          # Копируем код в DEPLOY_DIR 
-          echo "📦 Updating application code..."
-          sudo rm -rf $DEPLOY_DIR/*
-          sudo cp -r "/home/ubuntu/DevOPs/DevOps1/CattyForDevOps"/* $DEPLOY_DIR/
-          sudo chown -R ubuntu:ubuntu $DEPLOY_DIR
-          cd $DEPLOY_DIR
+          echo "🔄 Restarting container..."
+          sudo docker stop catty-app || true
+          sudo docker rm catty-app || true
           
-          # build.sh (если есть)
-          build_script="$MAIN_DIR/build.sh"
-          if [ -f "$build_script" ]; then
-            echo "🔧 Running build.sh..."
-            bash "$build_script"
-          fi
+          echo "Starting new container..."
+          sudo docker run -d \
+            --name catty-app \
+            --restart unless-stopped \
+            -p 8181:8181 \
+            -e PYTHONPATH="/opt/CattyForDevOps" \
+            ghcr.io/${{ github.repository_owner }}/catty-app:latest
           
-          # test.sh (если есть)
-          test_script="$MAIN_DIR/test.sh"
-          if [ -f "$test_script" ]; then
-            echo "🧪 Running tests..."
-            if bash "$test_script"; then
-              echo "✅ Tests passed"
-            else
-              echo "❌ Tests failed - deployment cancelled"
-              exit 1
-            fi
-          fi
+          echo "📊 Checking deployment..."
+          sleep 3
+          sudo docker ps
           
-          # deploy.sh (если есть)
-          deploy_script="$MAIN_DIR/deploy.sh"
-          if [ -f "$deploy_script" ]; then
-            echo "🚀 Running deploy.sh..."
-            bash "$deploy_script"
-            echo "✅ Deployment completed"
-          else
-            echo "⚠️ No deploy.sh, only code updated"
-            
-            # Минимальный деплой если нет deploy.sh
-            VENV_PATH="/home/ubuntu/venv"
-            if [ ! -d "$VENV_PATH" ]; then	
-              python3 -m venv $VENV_PATH
-            fi
-            source $VENV_PATH/bin/activate
-            pip install --upgrade pip
-            pip install -r requirements.txt
-            
-            # Перезапускаем сервис
-            sudo systemctl restart catty.service
-          fi
+          echo "🔍 Testing application..."
+          curl -f http://app.zabirov.course.prafdin.ru/login && echo "✅ Application is running!" || echo "⚠️ Application might be starting..."
           
-          echo "🎉 Application deployed successfully!"
-          echo "📱 Available at: http://app.zabirov.course.prafdin.ru"
+          echo "🎉 Docker deployment completed!"
+          echo "🌐 Available at: http://app.zabirov.course.prafdin.ru"
