@@ -29,13 +29,7 @@ jobs:
         
     - name: Run integration tests
       run: |
-        # Если нужны UI-тесты с Playwright
-        python -m pip install pytest
-        python -m pip install playwright
-        playwright install chromium
-        
-        # Запускаем интеграционные тесты против запущенного контейнера
-        python -m pytest tests/ -v -k "integration"
+         docker exec test-app python -m pytest tests/ -v
         
     - name: Cleanup
       if: always()
