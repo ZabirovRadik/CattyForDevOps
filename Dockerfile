@@ -2,15 +2,13 @@ FROM python:3.10-slim
 
 WORKDIR /opt/CattyForDevOps
 
-COPY . .
-RUN pip install --upgrade pip
-RUN pip install -r requirements.txt
+COPY requirements.txt .
+RUN pip install --upgrade pip && \
+    pip install -r requirements.txt --no-cache-dir
 
+COPY . .
 
 ENV PYTHONPATH="/opt/CattyForDevOps"
-
-RUN python --version
-RUN pip list
 
 EXPOSE 8181
 
