@@ -17,9 +17,16 @@ jobs:
     - name: Build Docker image
       run: |
         docker build -t catty-app .
+    
+        
     - name: Start application and run basic health check
       run: |
+        echo "🔍 Alternative debug:"
+        docker run -d -p 8181:8181 --name test-app catty-app
+        sleep 2
         docker ps -a
+        docker logs test-app || echo "Container already stopped"
+
         echo "🔄 Waiting for app to start..."
         sleep 10
         
