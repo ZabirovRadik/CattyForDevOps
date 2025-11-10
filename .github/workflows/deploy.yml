@@ -5,7 +5,7 @@ on:
     workflows: ["CI Pipeline with Docker"]
     types:
       - completed
-    branches: [Docker]
+    branches: [Docker-compose]
 
 jobs:
   deploy:
