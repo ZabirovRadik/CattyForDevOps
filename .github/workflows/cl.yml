@@ -16,7 +16,7 @@ jobs:
       
     - name: Start services with Docker Compose
       run: |
-        docker-compose up -d
+        docker compose up -d
         sleep 10
     
         
@@ -30,7 +30,7 @@ jobs:
         
     - name: Run integration tests
       run: |
-        pytest tests/test_unit.py tests/test_api.py -v
+        docker exec test-app python -m pytest tests/test_unit.py tests/test_api.py -v
         
     - name: Cleanup
       if: always()
