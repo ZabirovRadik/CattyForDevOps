@@ -13,13 +13,7 @@ services:
     volumes:
       - mysql_data:/var/lib/mysql
     networks:
-      catty-network:
-        aliases:
-          - db
-    healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-pmypass"]
-      timeout: 20s
-      retries: 10
+      - catty-network
 
   backend:
     build: 
@@ -32,8 +26,7 @@ services:
     environment:
       PYTHONPATH: "/opt/CattyForDevOps"
     depends_on:
-      database:
-        condition: service_healthy
+      - database
     networks:
       - catty-network
 
