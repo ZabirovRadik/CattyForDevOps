@@ -6,10 +6,10 @@ services:
     container_name: catty-mysql
     restart: unless-stopped
     environment:
-      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_ROOT_PASSWORD: mypass
       MYSQL_DATABASE: catty_reminders
-      MYSQL_USER: cattyuser
-      MYSQL_PASSWORD: cattypassword
+      MYSQL_USER: root
+      MYSQL_PASSWORD: mypass
     volumes:
       - mysql_data:/var/lib/mysql
     networks:
