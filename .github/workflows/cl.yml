@@ -29,7 +29,8 @@ jobs:
         
     - name: Run integration tests
       run: |
-        if ! docker exec catty-backend python -m pytest tests/test_unit.py tests/test_api.py -v; then
+        pip install -r requirements.txt
+        if ! python -m pytest tests/test_unit.py tests/test_api.py -v; then
           echo "==== Backend logs ===="
           docker logs catty-backend
           exit 1
