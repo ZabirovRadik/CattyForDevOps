@@ -1,11 +1,8 @@
 ﻿name: CD - Deploy with Docker Compose
 
 on:
-  workflow_run:
-    workflows: ["CI Pipeline with Docker"]
-    types:
-      - completed
-    branches: [Docker-compose]
+  release:
+    types: [published]
 
 jobs:
   deploy:
