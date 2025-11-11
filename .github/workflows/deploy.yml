@@ -41,7 +41,7 @@ jobs:
           sudo docker compose ps
           
           echo "🔍 Checking application health..."
-          sleep 10
+          sleep 20
           curl -f http://app.zabirov.course.prafdin.ru/login || echo "⚠️ Application might be starting..."
           
           echo "✅ Docker Compose deployment completed!"

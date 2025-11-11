@@ -17,26 +17,28 @@ jobs:
     - name: Start services with Docker Compose
       run: |
         docker compose up -d
-        sleep 10
+        sleep 20
     
         
     - name: Start application and run basic health check
       run: |
         docker ps -a
-        docker logs test-app || echo "Docker-compose already stopped"
         
         # Базовая проверка что приложение работает
         curl -f http://localhost:8181/ && echo "✅ App is running!"
         
     - name: Run integration tests
       run: |
-        docker exec test-app python -m pytest tests/test_unit.py tests/test_api.py -v
+        if ! docker exec catty-backend python -m pytest tests/test_unit.py tests/test_api.py -v; then
+          echo "==== Backend logs ===="
+          docker logs catty-backend
+          exit 1
+        fi
         
     - name: Cleanup
       if: always()
       run: |
-        docker stop test-app || true
-        docker rm test-app || true
+        docker compose down
 
   docker-build:
     needs: test
