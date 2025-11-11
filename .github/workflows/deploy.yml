@@ -1,22 +1,16 @@
 ﻿name: CD - Deploy with Docker Compose
 
 on:
-  workflow_run:
-    workflows: ["CI Pipeline with Docker"]
-    types:
-      - completed
-    branches: [Docker-compose]
+  release:
+    types: [published]
 
 jobs:
   deploy:
-    if: ${{ github.event.workflow_run.conclusion == 'success' }}
     runs-on: ubuntu-latest
     
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
-      with:
-        ref: Docker-compose 
 
     - name: Setup SSH
       uses: webfactory/ssh-agent@v0.7.0
@@ -33,15 +27,14 @@ jobs:
         script: |
           set -e
           
-          echo "🚀 Deploying with Docker Compose..."
+          echo "🚀 Deploying release: ${{ github.event.release.tag_name }}"
           
-          # Используйте GITHUB_TOKEN вместо TOKEN
           echo "${{ secrets.GITHUB_TOKEN }}" | sudo docker login ghcr.io -u ${{ github.actor }} --password-stdin
           
           cd /home/ubuntu/DevOPs/DevOps1/CattyForDevOps
           
-          # Обновляем код
-          sudo git pull origin Docker-compose
+          sudo git fetch origin
+          sudo git checkout ${{ github.event.release.tag_name }} || sudo git pull origin main
           
           sudo docker compose down
           sudo docker compose pull backend
@@ -54,5 +47,5 @@ jobs:
           sleep 20
           curl -f http://app.zabirov.course.prafdin.ru/login || echo "⚠️ Application might be starting..."
           
-          echo "✅ Docker Compose deployment completed!"
+          echo "✅ Release ${{ github.event.release.tag_name }} deployed successfully!"
           echo "🌐 Available at: http://app.zabirov.course.prafdin.ru"
