@@ -14,28 +14,23 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v4
       
-    - name: Build Docker image
+    - name: Start services with Docker Compose
       run: |
-        docker build -t catty-app .
+        docker-compose up -d
+        sleep 10
     
         
     - name: Start application and run basic health check
       run: |
-        echo "🔍 Alternative debug:"
-        docker run -d -p 8181:8181 --name test-app catty-app
-        sleep 2
         docker ps -a
-        docker logs test-app || echo "Container already stopped"
-
-        echo "🔄 Waiting for app to start..."
-        sleep 10
+        docker logs test-app || echo "Docker-compose already stopped"
         
         # Базовая проверка что приложение работает
         curl -f http://localhost:8181/ && echo "✅ App is running!"
         
     - name: Run integration tests
       run: |
-        docker exec test-app python -m pytest tests/test_unit.py tests/test_api.py -v
+        pytest tests/test_unit.py tests/test_api.py -v
         
     - name: Cleanup
       if: always()
