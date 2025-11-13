@@ -71,5 +71,5 @@ jobs:
         context: .
         push: true
         tags: |
-            ghcr.io/zabirovradik:latest
-            ghcr.io/zabirovradik:${{ github.sha }}
+            ghcr.io/zabirovradik/cattyfordevops:latest
+            ghcr.io/zabirovradik/cattyfordevops:${{ github.sha }}
