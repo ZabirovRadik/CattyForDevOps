@@ -16,9 +16,7 @@ services:
       - catty-network
 
   backend:
-    build: 
-      context: .
-      dockerfile: Dockerfile
+    image: ghcr.io/zabirovradik/cattyfordevops:latest
     container_name: catty-backend  
     restart: unless-stopped
     ports:
