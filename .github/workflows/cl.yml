@@ -71,7 +71,5 @@ jobs:
         context: .
         push: true
         tags: |
-            ghcr.io/zabirovradik/catty-app:latest
-            ghcr.io/zabirovradik/catty-app:${{ github.sha }}
-        cache-from: type=gha
-        cache-to: type=gha,mode=max
+            ghcr.io/${{ github.repository }}:latest
+            ghcr.io/${{ github.repository }}:${{ github.sha }}
