@@ -6,7 +6,6 @@ on:
 
 jobs:
   deploy:
-    if: ${{ github.event.workflow_run.conclusion == 'success' }}
     runs-on: ubuntu-latest
     
     steps:
@@ -35,7 +34,7 @@ jobs:
           echo "${{ secrets.GITHUB_TOKEN }}" | sudo docker login ghcr.io -u ${{ github.actor }} --password-stdin
           
           echo "Pulling new image..."
-          sudo docker pull ghcr.io/${{ github.repository_owner }}/catty-app:latest
+          sudo docker pull ghcr.io/zabirovradik/catty-app:latest
           
           echo "🔄 Restarting container..."
           sudo docker stop catty-app || true
@@ -47,7 +46,7 @@ jobs:
             --restart unless-stopped \
             -p 8181:8181 \
             -e PYTHONPATH="/opt/CattyForDevOps" \
-            ghcr.io/${{ github.repository_owner }}/catty-app:latest
+            ghcr.io/zabirovradik/catty-app:latest
           
           echo "📊 Checking deployment..."
           sleep 3
