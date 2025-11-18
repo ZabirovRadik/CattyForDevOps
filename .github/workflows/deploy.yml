@@ -31,7 +31,7 @@ jobs:
           echo "📱 Target: http://app.zabirov.course.prafdin.ru"
           
           echo "Logging to GHCR..."
-          echo "${{ secrets.GITHUB_TOKEN }}" | sudo docker login ghcr.io -u ${{ github.actor }} --password-stdin
+          echo "${{ secrets.TOKEN }}" | sudo docker login ghcr.io -u ${{ github.actor }} --password-stdin
           
           echo "Pulling new image..."
           sudo docker pull ghcr.io/zabirovradik/catty-app:latest
