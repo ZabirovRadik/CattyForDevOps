@@ -24,14 +24,12 @@ jobs:
       run: |
         docker ps -a
         
-        # Базовая проверка что приложение работает
-        curl -f http://localhost:8181/ && echo "✅ App is running!"
+        curl -f http://localhost:8181/ && echo "App is running!"
         
     - name: Run integration tests
       run: |
         pip install -r requirements.txt
         if ! python -m pytest tests/test_unit.py -v; then
-          echo "==== Backend logs ===="
           docker logs catty-backend
           exit 1
         fi
@@ -64,7 +62,8 @@ jobs:
       with:
         registry: ghcr.io
         username: ${{ github.actor }}
-        password: ${{ secrets.GITHUB_TOKEN }}
+        password: ${{ secrets.TOKEN }}
+
     - name: Build and push Docker image
       uses: docker/build-push-action@v4
       with:
