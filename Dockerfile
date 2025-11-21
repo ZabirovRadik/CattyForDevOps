@@ -1,11 +1,4 @@
 FROM python:3.11
-# Установка системных зависимостей для MySQL
-RUN apt-get update && apt-get install -y \
-    curl \
-    default-libmysqlclient-dev \
-    pkg-config \
-    gcc \
-    && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /opt/CattyForDevOps
 
